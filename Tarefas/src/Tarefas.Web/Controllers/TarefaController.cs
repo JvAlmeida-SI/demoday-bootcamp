@@ -3,33 +3,41 @@ using Tarefas.Web.Models;
 using Tarefas.DTO;
 using Tarefas.DAO;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Tarefas.Web.Controllers
 {
+    [Authorize]
     public class TarefaController : Controller
     {
         private readonly ITarefaDAO _tarefaDAO;
 
         private readonly IMapper _mapper;
 
-        public TarefaController(ITarefaDAO tarefaDAO, IMapper mapper)
+        private readonly IUsuarioDAO _usuarioDAO;
+        private readonly int _usuarioId;
+
+
+        public TarefaController(ITarefaDAO tarefaDAO, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _tarefaDAO = tarefaDAO;
             _mapper = mapper;
+            _usuarioId = int.Parse(httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.PrimarySid));
         }
         
-        public IActionResult Details(int id)
+        public IActionResult Details(int id, int _usuarioId)
         {            
-            var tarefaDTO = _tarefaDAO.Consultar(id);
+            var tarefaDTO = _tarefaDAO.Consultar(id, _usuarioId);
 
             var TarefaViewModel = _mapper.Map<TarefaViewModel>(tarefaDTO);
 
             return View(TarefaViewModel);
         }
-
+    
         public IActionResult Index()
         {   
-            var listaDeTarefasDTO = _tarefaDAO.Consultar();
+            var listaDeTarefasDTO = _tarefaDAO.Consultar(_usuarioId);
 
             var listaDeTarefa = new List<TarefaViewModel>();
             
@@ -43,6 +51,7 @@ namespace Tarefas.Web.Controllers
 
         public IActionResult Create()
         {
+            ViewBag.UsuarioId = _usuarioId;
             return View();
         }
 
@@ -76,18 +85,18 @@ namespace Tarefas.Web.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Update(int id)
+        public IActionResult Update(int id, int usuarioId)
         {
-            var tarefaDTO = _tarefaDAO.Consultar(id);
+            var tarefaDTO = _tarefaDAO.Consultar(id, usuarioId);
 
             var tarefaViewModel = _mapper.Map<TarefaViewModel>(tarefaDTO);
 
             return View(tarefaViewModel);
         }
 
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int id, int usuarioId)
         {
-            _tarefaDAO.Excluir(id);
+            _tarefaDAO.Excluir(id, usuarioId);
 
             return RedirectToAction("Index");
         }

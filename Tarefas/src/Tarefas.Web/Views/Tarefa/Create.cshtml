@@ -1,6 +1,7 @@
 @model Tarefas.Web.Models.TarefaViewModel
 
 <form asp-action="Create" class="row g-3">
+    
 
     <h3>Nova Tarefa</h3>
 
@@ -8,7 +9,10 @@
 
     <input asp-for="Id" hidden />
 
-    <input asp-for="Concluida" hidden />    
+    <input asp-for="Concluida" hidden /> 
+
+    <input asp-for="UsuarioId" value="@ViewBag.UsuarioId" hidden /> 
+
 
     <div class="col-12">
         <div class="form-group">
